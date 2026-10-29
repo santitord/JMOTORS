@@ -363,7 +363,7 @@ footer .logo b{font-size:18px}
 const CONFIG = {
   agent: "Yoni",
   whatsapp: "13059028510",       // Número con código de país, solo dígitos. Ej: "13055551234"
-  sheetCsvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTW0dL00VAhOgJIc_MqVl1V4op3Q-NYRI8WAhoHOiLm0HxZCYhFb76WZgVzprl6tdXbMwQdw2lmlYgl/pub?gid=1324477306&single=true&output=csv",       // Google Sheet → Archivo → Compartir → Publicar en la web → CSV. Pegá el link acá.
+  sheetCsvUrl: https://docs.google.com/spreadsheets/d/1xSYs6WpLYMohFffIAuraC313tmzo3fwfJpUTKs5514A/edit?gid=1941958825#gid=1941958825",     // Google Sheet → Archivo → Compartir → Publicar en la web → CSV. Pegá el link acá.
   address: "",           // Dirección del dealer. Ej: "1234 NW 7th St, Miami, FL 33125"
   hours: "",             // Ej: "Lun a Sáb 9 a 19 h"
   siteUrl: "",           // URL final del sitio, para que el link del auto viaje en el WhatsApp
@@ -493,11 +493,20 @@ function normalize(r,i){
     desc_es: r.desc_es||"", desc_en: r.desc_en||"", order:i
   };
 }
+/* Acepta el link normal de la planilla (lectura en vivo) o el link de "Publicar en la web" (CSV con caché de Google) */
+function sheetUrl(u){
+  const live = /\/spreadsheets\/d\/(?!e\/)([\w-]+)/.exec(u);
+  if(live){
+    const gid = (/[#?&]gid=(\d+)/.exec(u)||[])[1] || "0";
+    return "https://docs.google.com/spreadsheets/d/"+live[1]+"/gviz/tq?tqx=out:csv&headers=1&gid="+gid+"&_="+Date.now();
+  }
+  return u + (u.includes("?")?"&":"?") + "_=" + Date.now();
+}
 async function load(){
   let rows = null, failed = false;
   if(CONFIG.sheetCsvUrl){
     try{
-      const res = await fetch(CONFIG.sheetCsvUrl,{cache:"no-store"});
+      const res = await fetch(sheetUrl(CONFIG.sheetCsvUrl),{cache:"no-store"});
       if(!res.ok) throw new Error(res.status);
       rows = parseCSV(await res.text());
       if(!rows.length) throw new Error("empty");
