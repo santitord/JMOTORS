@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>J Motors Miami</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="J Motors · Autos usados en Miami con precio a la vista. Used cars in Miami, price up front.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: sticky header → hero (pitch + quick search) → inventory (filters rail + card grid) → how to buy → footer. Detail opens as a sheet over the page. */
+:root{
+  --bg:#EEF1F4; --surface:#FFFFFF; --ink:#0D1624; --muted:#566273; --line:#D8DEE6;
+  --accent:#1B47D6; --accent-ink:#FFFFFF; --sticker:#FFD43B; --sticker-ink:#1B1500;
+  --wa:#0F8A47; --wa-ink:#FFFFFF; --warn:#B45309; --warn-bg:#FEF3C7; --deal:#0F7B3E; --deal-bg:#DCF5E6;
+  --shadow:0 1px 2px rgba(13,22,36,.06),0 8px 24px rgba(13,22,36,.06);
+  --f-display:"Archivo","Arial Narrow",Arial,sans-serif;
+  --f-body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0A1019; --surface:#111A27; --ink:#E7ECF2; --muted:#93A0B1; --line:#223044;
+  --accent:#7A9EFF; --accent-ink:#06102A; --sticker:#FFD43B; --sticker-ink:#1B1500;
+  --wa:#22A95C; --wa-ink:#04140A; --warn:#FBBF24; --warn-bg:#3A2A08; --deal:#4ADE80; --deal-bg:#0E2E1B;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0A1019; --surface:#111A27; --ink:#E7ECF2; --muted:#93A0B1; --line:#223044;
+  --accent:#7A9EFF; --accent-ink:#06102A; --sticker:#FFD43B; --sticker-ink:#1B1500;
+  --wa:#22A95C; --wa-ink:#04140A; --warn:#FBBF24; --warn-bg:#3A2A08; --deal:#4ADE80; --deal-bg:#0E2E1B;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25); color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+a{color:inherit}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.num{font-variant-numeric:tabular-nums}
+.mono{font-family:var(--f-mono)}
+
+/* Header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:16px;min-height:62px}
+.logo{display:flex;align-items:baseline;gap:6px;text-decoration:none;margin-right:auto}
+.logo b{font-family:var(--f-display);font-stretch:125%;font-weight:900;font-size:22px;letter-spacing:-.02em}
+.logo b i{font-style:normal;color:var(--accent)}
+.logo span{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.nav{display:flex;gap:20px}
+.nav a{text-decoration:none;font-weight:500;color:var(--muted)}
+.nav a:hover{color:var(--ink)}
+.lang{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:2px}
+.lang button{border:0;background:none;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.06em;cursor:pointer;color:var(--muted)}
+.lang button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:999px;padding:10px 18px;font-weight:700;text-decoration:none;cursor:pointer;white-space:nowrap}
+.btn-wa{background:var(--wa);color:var(--wa-ink)}
+.btn-wa:hover{filter:brightness(1.07)}
+.btn-ghost{background:transparent;border:1px solid var(--line)}
+.btn-ghost:hover{border-color:var(--ink)}
+.btn svg{width:18px;height:18px;flex:none}
+@media (max-width:820px){.nav{display:none}.top .btn-wa .lbl{display:none}.top .btn-wa{padding:9px}}
+
+/* Demo banner */
+.demo{background:var(--warn-bg);color:var(--warn);font-size:13px;font-weight:600}
+.demo .wrap{padding-block:8px}
+
+/* Hero */
+.hero .wrap{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:40px;align-items:end;padding-block:56px 40px}
+.eyebrow{display:flex;gap:10px;align-items:center;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--wa)}
+.hero h1{font-family:var(--f-display);font-stretch:118%;font-weight:850;font-size:clamp(36px,6vw,72px);line-height:.96;letter-spacing:-.03em;margin:14px 0 18px;text-wrap:balance}
+.hero h1 mark{background:var(--sticker);color:var(--sticker-ink);padding:0 .12em;border-radius:4px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.hero p.lead{font-size:18px;color:var(--muted);max-width:52ch;margin:0}
+.quick{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow);display:grid;gap:14px}
+.quick h2{margin:0;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.field{display:grid;gap:6px;min-width:0}
+.field label,.field .lab{font-size:12px;font-weight:600;color:var(--muted)}
+.input,select.input{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:var(--r);padding:11px 12px;min-width:0}
+.input:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn-primary{background:var(--accent);color:var(--accent-ink)}
+.stats{display:flex;gap:28px;flex-wrap:wrap;margin-top:28px}
+.stats div{display:grid}
+.stats b{font-family:var(--f-display);font-stretch:110%;font-size:28px;font-weight:800;font-variant-numeric:tabular-nums}
+.stats span{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.04em}
+@media (max-width:860px){.hero .wrap{grid-template-columns:1fr;padding-block:32px 28px;gap:24px}}
+
+/* Inventory */
+.inv{padding-block:12px 64px}
+.inv-head{display:flex;gap:12px;align-items:end;justify-content:space-between;flex-wrap:wrap;margin-bottom:18px}
+.inv-head h2{font-family:var(--f-display);font-stretch:112%;font-weight:800;font-size:30px;letter-spacing:-.02em;margin:0}
+.inv-head .count{color:var(--muted);font-weight:600}
+.inv-tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.inv-tools select{width:auto}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);gap:28px;align-items:start}
+.filters{position:sticky;top:calc(env(safe-area-inset-top,0px) + 78px);display:grid;gap:18px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px}
+.filters h3{margin:0;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.range-val{font-family:var(--f-mono);font-size:13px;font-weight:600}
+.linkbtn{background:none;border:0;padding:0;color:var(--accent);font-weight:700;cursor:pointer;justify-self:start}
+.filters-toggle{display:none}
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr}
+  .filters{position:static;display:none}
+  .filters.open{display:grid}
+  .filters-toggle{display:inline-flex}
+}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px}
+.card{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;transition:transform .18s ease,box-shadow .18s ease}
+.card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.card a.hit{text-decoration:none;display:flex;flex-direction:column;flex:1}
+.media{position:relative;aspect-ratio:4/3;max-width:100%;overflow:hidden;background:var(--bg)}
+.media img{width:100%;height:100%;object-fit:cover;display:block}
+.tile{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:16px;overflow:hidden}
+.tile .mk{font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;opacity:.8}
+.tile .md{font-family:var(--f-display);font-stretch:125%;font-weight:900;font-size:clamp(28px,4vw,40px);line-height:.9;letter-spacing:-.03em;text-transform:uppercase;word-break:break-word}
+.tile .soon{position:absolute;top:14px;right:14px;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;opacity:.7}
+.card .tile .soon{display:none}
+.tile::after{content:"";position:absolute;left:-10%;right:-10%;bottom:36%;height:1px;background:currentColor;opacity:.18}
+.badges{position:absolute;top:12px;left:12px;display:flex;gap:6px;flex-wrap:wrap;z-index:1}
+.badge{font-size:11px;font-weight:700;letter-spacing:.04em;padding:4px 9px;border-radius:999px;background:var(--surface);color:var(--ink)}
+.badge.res{background:var(--warn-bg);color:var(--warn)}
+.badge.deal{background:var(--deal-bg);color:var(--deal)}
+.badge.new{background:var(--ink);color:var(--surface)}
+.fav{position:absolute;top:10px;right:10px;z-index:2;width:38px;height:38px;border-radius:50%;border:0;background:var(--surface);display:grid;place-items:center;cursor:pointer;box-shadow:var(--shadow)}
+.fav svg{width:19px;height:19px;fill:none;stroke:var(--ink);stroke-width:2}
+.fav[aria-pressed="true"] svg{fill:#E11D48;stroke:#E11D48}
+.cbody{padding:16px;display:grid;gap:10px;flex:1;align-content:start}
+.cbody h3{margin:0;font-size:17px;line-height:1.25;font-weight:700}
+.cbody h3 small{display:block;font-size:13px;font-weight:500;color:var(--muted);margin-top:2px}
+.specs{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13px;color:var(--muted)}
+.specs span{white-space:nowrap}
+.pricerow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:4px}
+.sticker{display:inline-block;background:var(--sticker);color:var(--sticker-ink);font-family:var(--f-display);font-stretch:110%;font-weight:900;font-size:22px;letter-spacing:-.01em;padding:2px 10px;border-radius:4px;transform:rotate(-1.5deg);font-variant-numeric:tabular-nums}
+.was{font-size:13px;color:var(--muted);text-decoration:line-through;font-variant-numeric:tabular-nums}
+.monthly{font-size:12px;color:var(--muted);text-align:right}
+.monthly b{display:block;color:var(--ink);font-size:14px;font-variant-numeric:tabular-nums}
+.cfoot{padding:0 16px 16px}
+.cfoot .btn{width:100%}
+.empty{grid-column:1/-1;text-align:center;padding:48px 16px;border:1px dashed var(--line);border-radius:14px;color:var(--muted)}
+.empty b{display:block;color:var(--ink);font-size:18px;margin-bottom:6px}
+.loading{grid-column:1/-1;color:var(--muted);padding:32px 0}
+
+/* How to buy */
+.how{background:var(--surface);border-block:1px solid var(--line)}
+.how .wrap{padding-block:56px}
+.how h2{font-family:var(--f-display);font-stretch:112%;font-weight:800;font-size:30px;letter-spacing:-.02em;margin:0 0 28px}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px;list-style:none;margin:0;padding:0;counter-reset:s}
+.steps li{display:grid;gap:8px;counter-increment:s;padding-top:16px;border-top:2px solid var(--ink)}
+.steps li::before{content:counter(s);font-family:var(--f-mono);font-size:13px;font-weight:600;color:var(--muted)}
+.steps b{font-size:18px}
+.steps p{margin:0;color:var(--muted)}
+@media (max-width:760px){.steps{grid-template-columns:1fr}}
+
+/* Footer */
+footer .wrap{padding-block:36px 96px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:start}
+footer p{margin:0;color:var(--muted);font-size:13px;max-width:70ch}
+footer .logo b{font-size:18px}
+@media (max-width:700px){footer .wrap{grid-template-columns:1fr}}
+
+/* Floating WhatsApp */
+.fab{position:fixed;z-index:30;right:calc(18px + env(safe-area-inset-right,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));width:58px;height:58px;border-radius:50%;background:var(--wa);color:var(--wa-ink);display:grid;place-items:center;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.fab svg{width:28px;height:28px}
+
+/* Detail sheet */
+.sheet-bg{position:fixed;inset:0;z-index:50;background:rgba(5,10,18,.55);display:flex;justify-content:flex-end}
+.sheet{background:var(--surface);width:min(920px,100%);height:100%;overflow-y:auto;overscroll-behavior:contain;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);animation:slide .22s ease}
+@keyframes slide{from{transform:translateX(24px);opacity:.6}to{transform:none;opacity:1}}
+.sheet-top{position:sticky;top:0;z-index:2;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:12px max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px))}
+.sheet-top .t{font-weight:700;margin-right:auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.iconbtn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;cursor:pointer;flex:none}
+.iconbtn svg{width:18px;height:18px}
+.sheet-in{padding:20px max(16px,env(safe-area-inset-right,0px)) 40px max(16px,env(safe-area-inset-left,0px));display:grid;gap:28px}
+.gal{display:grid;gap:10px}
+.gal .main{position:relative;aspect-ratio:16/10;max-width:100%;border-radius:12px;overflow:hidden;background:var(--bg)}
+.gal .main img{width:100%;height:100%;object-fit:cover;display:block}
+.thumbs{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.thumbs button{flex:none;width:86px;aspect-ratio:4/3;border-radius:8px;overflow:hidden;border:2px solid transparent;padding:0;cursor:pointer;background:var(--bg)}
+.thumbs button[aria-current="true"]{border-color:var(--accent)}
+.thumbs img{width:100%;height:100%;object-fit:cover;display:block}
+.d-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:start}
+.d-head h2{margin:0;font-family:var(--f-display);font-stretch:112%;font-weight:850;font-size:clamp(26px,4vw,38px);line-height:1.02;letter-spacing:-.02em;text-wrap:balance}
+.d-head p{margin:6px 0 0;color:var(--muted)}
+.d-price{text-align:right;display:grid;gap:4px;justify-items:end}
+.d-price .sticker{font-size:30px}
+.d-cta{display:flex;gap:10px;flex-wrap:wrap}
+.d-cols{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:28px;align-items:start}
+@media (max-width:760px){.d-cols{grid-template-columns:1fr}.d-head{grid-template-columns:1fr}.d-price{text-align:left;justify-items:start}}
+.label-card{border:2px solid var(--ink);border-radius:6px;overflow:hidden}
+.label-card header{background:var(--ink);color:var(--surface);padding:8px 14px;font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;display:flex;justify-content:space-between;gap:8px}
+.label-card dl{margin:0;display:grid;grid-template-columns:1fr 1fr}
+.label-card dl div{padding:10px 14px;border-bottom:1px solid var(--line);min-width:0}
+.label-card dl div:nth-child(odd){border-right:1px solid var(--line)}
+.label-card dt{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.label-card dd{margin:2px 0 0;font-weight:600;overflow-wrap:anywhere}
+.odo{display:flex;gap:2px}
+.odo span{font-family:var(--f-mono);font-weight:600;background:var(--ink);color:var(--surface);padding:1px 4px;border-radius:3px;font-size:14px}
+.vin{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 14px;font-family:var(--f-mono);font-size:13px;flex-wrap:wrap}
+.vin .linkbtn{font-family:var(--f-body);font-size:13px}
+.desc h3,.calc h3{margin:0 0 10px;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.desc p{margin:0;max-width:62ch;white-space:pre-line}
+.calc{background:var(--bg);border-radius:14px;padding:18px;display:grid;gap:14px}
+.calc .out{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.calc .out b{font-family:var(--f-display);font-stretch:112%;font-size:34px;font-weight:850;font-variant-numeric:tabular-nums}
+.calc .out span{color:var(--muted)}
+.seg{display:flex;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--surface)}
+.seg button{flex:1;border:0;background:none;padding:9px 0;font-weight:600;cursor:pointer;font-variant-numeric:tabular-nums}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+.fine{font-size:12px;color:var(--muted);margin:0}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:10px 16px;border-radius:999px;font-weight:600;z-index:60;font-size:14px}
+</style>
+<style>[hidden]{display:none!important}body{margin:0}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="#top" aria-label="J Motors"><b>J<i>·</i>MOTORS</b><span>Miami</span></a>
+    <nav class="nav" aria-label="Principal">
+      <a href="#inventario" data-i18n="navInv">Inventario</a>
+      <a href="#como-comprar" data-i18n="navHow">Cómo comprar</a>
+    </nav>
+    <div class="lang" role="group" aria-label="Idioma / Language">
+      <button type="button" data-lang="es" aria-pressed="true">ES</button>
+      <button type="button" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+    <a class="btn btn-wa" id="waTop" href="#" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .1-1.3c0-.1-.2-.2-.5-.3Z"/></svg><span class="lbl">WhatsApp</span></a>
+  </div>
+</header>
+
+<div class="demo" id="demoBanner" hidden><div class="wrap" id="demoText"></div></div>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <div class="eyebrow"><span class="dot"></span><span data-i18n="eyebrow">Miami, FL · Se habla español</span></div>
+        <h1 data-i18n-html="h1">Tu próximo auto en Miami, <mark>con el precio a la vista.</mark></h1>
+        <p class="lead" data-i18n="lead">Elegí el auto, escribile a Yoni por WhatsApp y coordiná tu test drive. Sin vueltas.</p>
+        <div class="stats">
+          <div><b id="stCount">0</b><span data-i18n="stCount">autos disponibles</span></div>
+          <div><b id="stFrom">$0</b><span data-i18n="stFrom">precio desde</span></div>
+          <div><b id="stMakes">0</b><span data-i18n="stMakes">marcas</span></div>
+        </div>
+      </div>
+      <form class="quick" id="quickForm" role="search">
+        <h2 data-i18n="quickTitle">Buscá tu auto</h2>
+        <div class="field">
+          <label for="qText" data-i18n="qText">Marca o modelo</label>
+          <input class="input" id="qText" type="search" autocomplete="off" data-i18n-ph="qTextPh" placeholder="Ej. Tacoma, RAV4, BMW">
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="qMake" data-i18n="make">Marca</label>
+            <select class="input" id="qMake"></select>
+          </div>
+          <div class="field">
+            <label for="qPrice" data-i18n="priceMax">Precio máximo</label>
+            <select class="input" id="qPrice"></select>
+          </div>
+        </div>
+        <button class="btn btn-primary" type="submit" id="qGo"><span data-i18n="qGo">Ver autos</span></button>
+      </form>
+    </div>
+  </section>
+
+  <section class="inv" id="inventario">
+    <div class="wrap">
+      <div class="inv-head">
+        <div>
+          <h2 data-i18n="invTitle">Inventario</h2>
+          <div class="count num" id="count"></div>
+        </div>
+        <div class="inv-tools">
+          <button type="button" class="btn btn-ghost filters-toggle" id="filtersToggle" aria-expanded="false" aria-controls="filters"><span data-i18n="filters">Filtros</span></button>
+          <label class="field" style="grid-auto-flow:column;align-items:center;gap:8px">
+            <span class="lab" data-i18n="sortBy">Ordenar</span>
+            <select class="input" id="sort"></select>
+          </label>
+        </div>
+      </div>
+      <div class="layout">
+        <aside class="filters" id="filters" aria-label="Filtros">
+          <h3 data-i18n="filters">Filtros</h3>
+          <div class="field">
+            <label for="fText" data-i18n="qText">Marca o modelo</label>
+            <input class="input" id="fText" type="search" autocomplete="off" data-i18n-ph="qTextPh" placeholder="Ej. Tacoma, RAV4, BMW">
+          </div>
+          <div class="field">
+            <label for="fMake" data-i18n="make">Marca</label>
+            <select class="input" id="fMake"></select>
+          </div>
+          <div class="field">
+            <span class="lab" data-i18n="body">Tipo</span>
+            <div class="chips" id="fBody"></div>
+          </div>
+          <div class="field">
+            <label for="fPrice"><span data-i18n="priceMax">Precio máximo</span> · <span class="range-val" id="fPriceVal"></span></label>
+            <input type="range" id="fPrice" min="0" max="100000" step="1000">
+          </div>
+          <div class="row2">
+            <div class="field">
+              <label for="fYear" data-i18n="yearMin">Año desde</label>
+              <select class="input" id="fYear"></select>
+            </div>
+            <div class="field">
+              <label for="fMiles" data-i18n="milesMax">Millas hasta</label>
+              <select class="input" id="fMiles"></select>
+            </div>
+          </div>
+          <div class="field">
+            <span class="lab" data-i18n="saved">Guardados</span>
+            <div class="chips"><button type="button" class="chip" id="fFav" aria-pressed="false"><span data-i18n="onlySaved">Solo mis guardados</span> (<span class="num" id="favCount">0</span>)</button></div>
+          </div>
+          <button type="button" class="linkbtn" id="fClear" data-i18n="clear">Limpiar filtros</button>
+        </aside>
+        <div class="grid" id="grid" aria-live="polite"><div class="loading" data-i18n="loading">Cargando inventario…</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="how" id="como-comprar">
+    <div class="wrap">
+      <h2 data-i18n="howTitle">Cómo comprar</h2>
+      <ol class="steps">
+        <li><b data-i18n="s1t">Elegí el auto</b><p data-i18n="s1p">Filtrá por marca, precio o año y mirá la ficha completa con fotos, millas y VIN.</p></li>
+        <li><b data-i18n="s2t">Escribile a Yoni</b><p data-i18n="s2p">Tocá WhatsApp en el auto que te gusta. El mensaje ya sale con el modelo y el número de stock.</p></li>
+        <li><b data-i18n="s3t">Vení a verlo</b><p data-i18n="s3p">Coordinás el test drive y cerrás la compra en el dealer, en Miami.</p></li>
+      </ol>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div style="display:grid;gap:10px;min-width:0">
+      <a class="logo" href="#top"><b>J<i>·</i>MOTORS</b><span>Miami</span></a>
+      <p id="footAddr"></p>
+      <p data-i18n="disclaimer">Precios en dólares, sin impuestos, tag, title ni dealer fees. La disponibilidad puede cambiar sin aviso; confirmá por WhatsApp antes de visitar.</p>
+    </div>
+    <a class="btn btn-wa" id="waFoot" href="#" target="_blank" rel="noopener"><span data-i18n="talk">Hablar con Yoni</span></a>
+  </div>
+</footer>
+
+<a class="fab" id="waFab" href="#" target="_blank" rel="noopener" aria-label="WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .1-1.3c0-.1-.2-.2-.5-.3Z"/></svg></a>
+
+<div id="sheetRoot"></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* =====================================================================
+   CONFIGURACIÓN · lo único que hay que editar
+   ===================================================================== */
+const CONFIG = {
+  agent: "Yoni",
+  whatsapp: "13059028510",       // Número con código de país, solo dígitos. Ej: "13055551234"
+  sheetCsvUrl: "",       // Google Sheet → Archivo → Compartir → Publicar en la web → CSV. Pegá el link acá.
+  address: "",           // Dirección del dealer. Ej: "1234 NW 7th St, Miami, FL 33125"
+  hours: "",             // Ej: "Lun a Sáb 9 a 19 h"
+  siteUrl: "",           // URL final del sitio, para que el link del auto viaje en el WhatsApp
+  apr: 7.9,              // Tasa anual de referencia para la cuota estimada
+  terms: [36, 48, 60, 72]
+};
+
+/* Inventario de ejemplo: se muestra solo si no hay planilla conectada */
+const DEMO = [
+  {id:"JM-1001",status:"available",featured:"yes",make:"Toyota",model:"Tacoma",year:2021,trim:"SR5 Double Cab",price:31900,old_price:33500,miles:38420,body:"pickup",transmission:"automatic",fuel:"gasoline",drivetrain:"4WD",engine:"3.5L V6",ext_color:"Silver Sky",color_hex:"#A7ADB3",int_color:"Black",vin:"3TMCZ5AN5MM000001",photos:"",desc_es:"Una sola dueña, service al día en concesionario oficial. Cubiertas nuevas.",desc_en:"One owner, dealer-serviced. New tires."},
+  {id:"JM-1002",status:"available",featured:"",make:"Jeep",model:"Wrangler",year:2022,trim:"Sahara Unlimited",price:38500,old_price:"",miles:21950,body:"suv",transmission:"automatic",fuel:"gasoline",drivetrain:"4WD",engine:"2.0L Turbo",ext_color:"Sarge Green",color_hex:"#4B5A3C",int_color:"Black",vin:"1C4HJXEN0NW000002",photos:"",desc_es:"Techo duro de 3 piezas, pantalla de 8,4\" con Apple CarPlay.",desc_en:"3-piece hardtop, 8.4\" screen with Apple CarPlay."},
+  {id:"JM-1003",status:"available",featured:"yes",make:"Tesla",model:"Model 3",year:2021,trim:"Long Range AWD",price:27900,old_price:29900,miles:44100,body:"sedan",transmission:"automatic",fuel:"electric",drivetrain:"AWD",engine:"Dual Motor",ext_color:"Pearl White",color_hex:"#EDEDEB",int_color:"Black",vin:"5YJ3E1EB1MF000003",photos:"",desc_es:"Autopilot, batería en buen estado. Ideal para la ciudad.",desc_en:"Autopilot, healthy battery. Great for city driving."},
+  {id:"JM-1004",status:"reserved",featured:"",make:"BMW",model:"X5",year:2020,trim:"xDrive40i",price:36900,old_price:"",miles:52300,body:"suv",transmission:"automatic",fuel:"gasoline",drivetrain:"AWD",engine:"3.0L I6 Turbo",ext_color:"Carbon Black",color_hex:"#1C2230",int_color:"Cognac",vin:"5UXCR6C05L9000004",photos:"",desc_es:"Paquete premium, techo panorámico y asientos calefaccionados.",desc_en:"Premium package, panoramic roof, heated seats."},
+  {id:"JM-1005",status:"available",featured:"",make:"Honda",model:"Civic",year:2022,trim:"Sport",price:22400,old_price:"",miles:18700,body:"sedan",transmission:"automatic",fuel:"gasoline",drivetrain:"FWD",engine:"2.0L I4",ext_color:"Rallye Red",color_hex:"#B3242A",int_color:"Black",vin:"2HGFE2F59NH000005",photos:"",desc_es:"Muy económico. Garantía de fábrica vigente.",desc_en:"Great on gas. Factory warranty still active."},
+  {id:"JM-1006",status:"available",featured:"",make:"Ford",model:"F-150",year:2020,trim:"XLT SuperCrew",price:29800,old_price:"",miles:61200,body:"pickup",transmission:"automatic",fuel:"gasoline",drivetrain:"4WD",engine:"2.7L EcoBoost V6",ext_color:"Velocity Blue",color_hex:"#1F4E8C",int_color:"Gray",vin:"1FTEW1EP5LF000006",photos:"",desc_es:"Enganche de remolque, cámara de retroceso y caja con protector.",desc_en:"Tow package, backup camera, bed liner."},
+  {id:"JM-1007",status:"available",featured:"",make:"Toyota",model:"RAV4",year:2022,trim:"XLE Hybrid",price:30900,old_price:"",miles:24800,body:"suv",transmission:"automatic",fuel:"hybrid",drivetrain:"AWD",engine:"2.5L Hybrid",ext_color:"Blueprint",color_hex:"#2B4A6F",int_color:"Black",vin:"4T3RWRFV9NU000007",photos:"",desc_es:"Híbrida, rinde más de 40 mpg. Una dueña.",desc_en:"Hybrid, 40+ mpg. One owner."},
+  {id:"JM-1008",status:"available",featured:"",make:"Mercedes-Benz",model:"C 300",year:2019,trim:"Sedan",price:24500,old_price:26200,miles:47900,body:"sedan",transmission:"automatic",fuel:"gasoline",drivetrain:"RWD",engine:"2.0L Turbo",ext_color:"Polar White",color_hex:"#F1F1EF",int_color:"Black",vin:"55SWF8DB5KU000008",photos:"",desc_es:"Paquete AMG Line, luces LED y sonido Burmester.",desc_en:"AMG Line package, LED lights, Burmester sound."},
+  {id:"JM-1009",status:"available",featured:"",make:"Chevrolet",model:"Tahoe",year:2021,trim:"LT",price:46900,old_price:"",miles:39600,body:"suv",transmission:"automatic",fuel:"gasoline",drivetrain:"4WD",engine:"5.3L V8",ext_color:"Black",color_hex:"#14161A",int_color:"Jet Black",vin:"1GNSKNKD3MR000009",photos:"",desc_es:"Tres filas, 8 pasajeros. Ideal para familia.",desc_en:"Three rows, seats 8. Built for families."}
+];
+
+/* ===================================================================== */
+const T = {
+  es:{navInv:"Inventario",navHow:"Cómo comprar",eyebrow:"Miami, FL · Se habla español",
+    h1:"Tu próximo auto en Miami, <mark>con el precio a la vista.</mark>",
+    lead:"Elegí el auto, escribile a {agent} por WhatsApp y coordiná tu test drive. Sin vueltas.",
+    stCount:"autos disponibles",stFrom:"precio desde",stMakes:"marcas",quickTitle:"Buscá tu auto",qText:"Marca o modelo",qTextPh:"Ej. Tacoma, RAV4, BMW",
+    make:"Marca",anyMake:"Todas",priceMax:"Precio máximo",anyPrice:"Sin límite",qGo:"Ver autos",invTitle:"Inventario",filters:"Filtros",sortBy:"Ordenar",
+    body:"Tipo",yearMin:"Año desde",milesMax:"Millas hasta",any:"Cualquiera",saved:"Guardados",onlySaved:"Solo mis guardados",clear:"Limpiar filtros",loading:"Cargando inventario…",
+    count1:"{n} auto",countN:"{n} autos",
+    sFeatured:"Destacados",sPriceAsc:"Menor precio",sPriceDesc:"Mayor precio",sYear:"Más nuevos",sMiles:"Menos millas",
+    bReserved:"Reservado",bDeal:"Bajó de precio",bNew:"Destacado",photoSoon:"Fotos pronto",perMonth:"/mes",est:"cuota est.",
+    askWa:"Consultar por WhatsApp",fav:"Guardar",unfav:"Quitar de guardados",
+    emptyT:"No hay autos con esos filtros",emptyP:"Probá ampliar el precio o limpiar los filtros. También podés escribirle a {agent} y te avisa cuando entre uno.",
+    howTitle:"Cómo comprar",s1t:"Elegí el auto",s1p:"Filtrá por marca, precio o año y mirá la ficha completa con fotos, millas y VIN.",
+    s2t:"Escribile a {agent}",s2p:"Tocá WhatsApp en el auto que te gusta. El mensaje ya sale con el modelo y el número de stock.",
+    s3t:"Vení a verlo",s3p:"Coordinás el test drive y cerrás la compra en el dealer, en Miami.",
+    disclaimer:"Precios en dólares, sin impuestos, tag, title ni dealer fees. La disponibilidad puede cambiar sin aviso; confirmá por WhatsApp antes de visitar.",
+    talk:"Hablar con {agent}",close:"Cerrar",share:"Copiar link",copied:"Link copiado",vinCopied:"VIN copiado",copyFail:"No se pudo copiar. Seleccioná el texto y copialo a mano.",
+    label:"Ficha del vehículo",stock:"Stock",year:"Año",mileage:"Millas",trans:"Transmisión",fuel:"Combustible",drive:"Tracción",engine:"Motor",ext:"Color exterior",int:"Interior",copyVin:"Copiar VIN",
+    descT:"Detalles",calcT:"Calculá tu cuota",down:"Anticipo",term:"Plazo (meses)",apr:"Tasa anual",monthlyEst:"por mes, estimado",
+    calcFine:"Es una estimación con la tasa que elegiste. No es una oferta de financiación: la tasa final depende de tu historial de crédito.",
+    waCar:"Hola {agent}, me interesa el {car} (Stock {id}) que vi en J Motors. ¿Sigue disponible?",
+    waGen:"Hola {agent}, estoy buscando un auto y vi el inventario de J Motors. ¿Me ayudás?",
+    demoNone:"Inventario de ejemplo. Conectá la Google Sheet en CONFIG.sheetCsvUrl para mostrar los autos reales.",
+    demoFail:"No se pudo leer la planilla, así que se muestra el inventario de ejemplo. Revisá que esté publicada en la web como CSV.",
+    bodies:{pickup:"Pickup",suv:"SUV",sedan:"Sedán",coupe:"Coupé",convertible:"Convertible",hatchback:"Hatchback",van:"Van",wagon:"Rural"},
+    transL:{automatic:"Automática",manual:"Manual"},fuelL:{gasoline:"Nafta",hybrid:"Híbrido",electric:"Eléctrico",diesel:"Diésel"},
+    addrPre:"Dónde estamos: ",hoursPre:"Horario: "},
+  en:{navInv:"Inventory",navHow:"How to buy",eyebrow:"Miami, FL · Se habla español",
+    h1:"Your next car in Miami, <mark>price up front.</mark>",
+    lead:"Pick a car, message {agent} on WhatsApp and book your test drive. No runaround.",
+    stCount:"cars available",stFrom:"starting at",stMakes:"makes",quickTitle:"Find your car",qText:"Make or model",qTextPh:"e.g. Tacoma, RAV4, BMW",
+    make:"Make",anyMake:"All makes",priceMax:"Max price",anyPrice:"No limit",qGo:"Show cars",invTitle:"Inventory",filters:"Filters",sortBy:"Sort",
+    body:"Body style",yearMin:"Year from",milesMax:"Miles up to",any:"Any",saved:"Saved",onlySaved:"Only my saved cars",clear:"Clear filters",loading:"Loading inventory…",
+    count1:"{n} car",countN:"{n} cars",
+    sFeatured:"Featured",sPriceAsc:"Lowest price",sPriceDesc:"Highest price",sYear:"Newest",sMiles:"Lowest miles",
+    bReserved:"On hold",bDeal:"Price drop",bNew:"Featured",photoSoon:"Photos soon",perMonth:"/mo",est:"est. payment",
+    askWa:"Ask on WhatsApp",fav:"Save",unfav:"Remove from saved",
+    emptyT:"No cars match those filters",emptyP:"Try a higher price or clear the filters. You can also message {agent} and he'll let you know when one comes in.",
+    howTitle:"How to buy",s1t:"Pick your car",s1p:"Filter by make, price or year and open the full listing with photos, miles and VIN.",
+    s2t:"Message {agent}",s2p:"Tap WhatsApp on the car you like. The message already includes the model and stock number.",
+    s3t:"Come see it",s3p:"Book a test drive and close the deal at the dealership in Miami.",
+    disclaimer:"Prices in US dollars, excluding tax, tag, title and dealer fees. Availability may change without notice; confirm on WhatsApp before visiting.",
+    talk:"Talk to {agent}",close:"Close",share:"Copy link",copied:"Link copied",vinCopied:"VIN copied",copyFail:"Couldn't copy. Select the text and copy it manually.",
+    label:"Vehicle details",stock:"Stock",year:"Year",mileage:"Mileage",trans:"Transmission",fuel:"Fuel",drive:"Drivetrain",engine:"Engine",ext:"Exterior",int:"Interior",copyVin:"Copy VIN",
+    descT:"Details",calcT:"Estimate your payment",down:"Down payment",term:"Term (months)",apr:"APR",monthlyEst:"per month, estimated",
+    calcFine:"This is an estimate at the rate you chose. It is not a financing offer: your final rate depends on your credit history.",
+    waCar:"Hi {agent}, I'm interested in the {car} (Stock {id}) I saw on J Motors. Is it still available?",
+    waGen:"Hi {agent}, I'm looking for a car and saw the J Motors inventory. Can you help me?",
+    demoNone:"Sample inventory. Connect the Google Sheet in CONFIG.sheetCsvUrl to show the real cars.",
+    demoFail:"Couldn't read the sheet, so sample inventory is shown. Make sure it's published to the web as CSV.",
+    bodies:{pickup:"Pickup",suv:"SUV",sedan:"Sedan",coupe:"Coupe",convertible:"Convertible",hatchback:"Hatchback",van:"Van",wagon:"Wagon"},
+    transL:{automatic:"Automatic",manual:"Manual"},fuelL:{gasoline:"Gasoline",hybrid:"Hybrid",electric:"Electric",diesel:"Diesel"},
+    addrPre:"Find us: ",hoursPre:"Hours: "}
+};
+
+const $ = s => document.querySelector(s);
+const store = {
+  get(k,d){try{const v=localStorage.getItem("jm_"+k);return v==null?d:JSON.parse(v)}catch(e){return d}},
+  set(k,v){try{localStorage.setItem("jm_"+k,JSON.stringify(v))}catch(e){}}
+};
+const esc = s => String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const usd = n => "$" + Math.round(n).toLocaleString("en-US");
+const fmtMiles = n => Math.round(n).toLocaleString("en-US") + " mi";
+
+let lang = store.get("lang", (navigator.language||"es").toLowerCase().startsWith("en") ? "en" : "es");
+let cars = [];
+let favs = new Set(store.get("favs", []));
+const state = {q:"",make:"",bodies:new Set(),priceMax:null,yearMin:"",milesMax:"",onlyFav:false,sort:"featured"};
+let priceCeil = 100000;
+
+const t = (k,vars={}) => {
+  let s = (T[lang][k] ?? T.es[k] ?? k);
+  vars = Object.assign({agent:CONFIG.agent}, vars);
+  return typeof s === "string" ? s.replace(/\{(\w+)\}/g,(_,v)=>vars[v]??"") : s;
+};
+
+/* ---------- Data ---------- */
+function parseCSV(text){
+  const rows=[];let row=[],f="",q=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(q){ if(c==='"'){ if(text[i+1]==='"'){f+='"';i++;} else q=false; } else f+=c; }
+    else if(c==='"') q=true;
+    else if(c===','){row.push(f);f="";}
+    else if(c==='\n'){row.push(f);rows.push(row);row=[];f="";}
+    else if(c!=='\r') f+=c;
+  }
+  if(f!==""||row.length){row.push(f);rows.push(row);}
+  const head=(rows.shift()||[]).map(h=>h.trim().toLowerCase());
+  return rows.filter(r=>r.some(c=>c.trim()!=="")).map(r=>Object.fromEntries(head.map((h,i)=>[h,(r[i]??"").trim()])));
+}
+const num = v => { const n = parseFloat(String(v??"").replace(/[^0-9.]/g,"")); return isFinite(n)?n:0; };
+const STATUS = {available:"available",disponible:"available",reserved:"reserved",reservado:"reserved",hold:"reserved",sold:"sold",vendido:"sold"};
+const BODY = {pickup:"pickup",camioneta:"pickup",truck:"pickup",suv:"suv",sedan:"sedan","sedán":"sedan",coupe:"coupe","coupé":"coupe",convertible:"convertible",hatchback:"hatchback",van:"van",minivan:"van",wagon:"wagon",rural:"wagon"};
+function normalize(r,i){
+  const st = STATUS[String(r.status||"available").toLowerCase()] || "available";
+  const b = BODY[String(r.body||"").toLowerCase()] || String(r.body||"").toLowerCase();
+  return {
+    id: r.id || ("JM-"+(1000+i)), status: st,
+    featured: /^(yes|si|sí|x|1|true)$/i.test(String(r.featured||"")),
+    make: r.make||"", model: r.model||"", year: num(r.year)||"", trim: r.trim||"",
+    price: num(r.price), old: num(r.old_price), miles: num(r.miles),
+    body: b, transmission: String(r.transmission||"").toLowerCase(), fuel: String(r.fuel||"").toLowerCase(),
+    drivetrain: r.drivetrain||"", engine: r.engine||"", ext: r.ext_color||"", hex: r.color_hex||"", int: r.int_color||"", vin: r.vin||"",
+    photos: String(r.photos||"").split(/[|\n]/).map(s=>s.trim()).filter(Boolean),
+    desc_es: r.desc_es||"", desc_en: r.desc_en||"", order:i
+  };
+}
+async function load(){
+  let rows = null, failed = false;
+  if(CONFIG.sheetCsvUrl){
+    try{
+      const res = await fetch(CONFIG.sheetCsvUrl,{cache:"no-store"});
+      if(!res.ok) throw new Error(res.status);
+      rows = parseCSV(await res.text());
+      if(!rows.length) throw new Error("empty");
+    }catch(e){ rows = null; failed = true; }
+  }
+  const demo = !rows;
+  cars = (rows || DEMO).map(normalize).filter(c=>c.status!=="sold" && c.make);
+  const b = $("#demoBanner");
+  b.hidden = !demo; b.dataset.kind = failed ? "demoFail" : "demoNone";
+  priceCeil = Math.max(20000, Math.ceil(Math.max(0,...cars.map(c=>c.price))/5000)*5000);
+  buildControls(); applyLang(); render(); routeFromHash();
+}
+
+/* ---------- Helpers ---------- */
+function carName(c){ return [c.year,c.make,c.model].filter(Boolean).join(" "); }
+function waLink(text){
+  const n = String(CONFIG.whatsapp||"").replace(/\D/g,"");
+  return "https://wa.me/"+n+"?text="+encodeURIComponent(text);
+}
+function waForCar(c){
+  let msg = t("waCar",{car:[carName(c),c.trim].filter(Boolean).join(" "), id:c.id});
+  if(CONFIG.siteUrl) msg += "\n" + CONFIG.siteUrl.replace(/#.*$/,"") + "#car-" + c.id;
+  return waLink(msg);
+}
+function monthly(price,down,months,apr){
+  const P = Math.max(0,price-down), r = apr/100/12;
+  if(!P) return 0;
+  return r ? P*r/(1-Math.pow(1+r,-months)) : P/months;
+}
+function lum(hex){
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex||""); if(!m) return 0.2;
+  const v = parseInt(m[1],16), ch = [v>>16&255,v>>8&255,v&255].map(x=>{x/=255;return x<=.03928?x/12.92:Math.pow((x+.055)/1.055,2.4)});
+  return .2126*ch[0]+.7152*ch[1]+.0722*ch[2];
+}
+function tileHTML(c){
+  const hex = /^#?[0-9a-f]{6}$/i.test(c.hex) ? (c.hex[0]==="#"?c.hex:"#"+c.hex) : "#2A3442";
+  const light = lum(hex) > .45;
+  const fg = light ? "#10161F" : "#F4F6F8";
+  return `<div class="tile" style="background:linear-gradient(150deg,${hex} 0%,color-mix(in srgb,${hex} 70%,#000) 100%);color:${fg}">
+    <span class="soon">${esc(t("photoSoon"))}</span><span class="mk">${esc(c.make)}</span><span class="md">${esc(c.model)}</span></div>`;
+}
+function imgHTML(src,alt,c){
+  return `<img src="${esc(src)}" alt="${esc(alt)}" loading="lazy" data-tile="${esc(c.id)}">`;
+}
+document.addEventListener("error", e=>{
+  const im = e.target;
+  if(im.tagName==="IMG" && im.dataset.tile){
+    const c = cars.find(x=>x.id===im.dataset.tile);
+    if(c){ const w=document.createElement("div"); w.innerHTML=tileHTML(c); im.replaceWith(w.firstElementChild); }
+  }
+}, true);
+
+/* ---------- Controls ---------- */
+function buildControls(){
+  const makes = [...new Set(cars.map(c=>c.make))].sort();
+  for(const id of ["#qMake","#fMake"]){
+    $(id).innerHTML = `<option value="">${esc(t("anyMake"))}</option>` + makes.map(m=>`<option value="${esc(m)}">${esc(m)}</option>`).join("");
+    $(id).value = state.make;
+  }
+  const steps = []; for(let p=15000;p<priceCeil;p+=5000) steps.push(p);
+  $("#qPrice").innerHTML = `<option value="">${esc(t("anyPrice"))}</option>` + steps.map(p=>`<option value="${p}">${usd(p)}</option>`).join("");
+  const fp = $("#fPrice"); fp.max = priceCeil; fp.min = Math.max(0, Math.floor(Math.min(...cars.map(c=>c.price||priceCeil))/5000)*5000);
+  if(state.priceMax==null) state.priceMax = priceCeil;
+  fp.value = state.priceMax;
+  const years = [...new Set(cars.map(c=>c.year).filter(Boolean))].sort((a,b)=>b-a);
+  $("#fYear").innerHTML = `<option value="">${esc(t("any"))}</option>` + years.map(y=>`<option value="${y}">${y}</option>`).join("");
+  $("#fYear").value = state.yearMin;
+  $("#fMiles").innerHTML = `<option value="">${esc(t("any"))}</option>` + [20000,40000,60000,80000,100000].map(m=>`<option value="${m}">${m.toLocaleString("en-US")}</option>`).join("");
+  $("#fMiles").value = state.milesMax;
+  const bodies = [...new Set(cars.map(c=>c.body).filter(Boolean))];
+  $("#fBody").innerHTML = bodies.map(b=>`<button type="button" class="chip" data-body="${esc(b)}" aria-pressed="${state.bodies.has(b)}">${esc(T[lang].bodies[b]||b)}</button>`).join("");
+  $("#sort").innerHTML = [["featured","sFeatured"],["price-asc","sPriceAsc"],["price-desc","sPriceDesc"],["year","sYear"],["miles","sMiles"]]
+    .map(([v,k])=>`<option value="${v}">${esc(t(k))}</option>`).join("");
+  $("#sort").value = state.sort;
+}
+
+function applyLang(){
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-lang]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.lang===lang));
+  document.querySelectorAll("[data-i18n]").forEach(el=>{ el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll("[data-i18n-html]").forEach(el=>{ el.innerHTML = t(el.dataset.i18nHtml); });
+  document.querySelectorAll("[data-i18n-ph]").forEach(el=>{ el.placeholder = t(el.dataset.i18nPh); });
+  const gen = waLink(t("waGen"));
+  ["#waTop","#waFoot","#waFab"].forEach(s=>$(s).href = gen);
+  const b = $("#demoBanner"); if(!b.hidden) $("#demoText").textContent = t(b.dataset.kind||"demoNone");
+  const addr = [CONFIG.address && t("addrPre")+CONFIG.address, CONFIG.hours && t("hoursPre")+CONFIG.hours].filter(Boolean).join(" · ");
+  $("#footAddr").textContent = addr; $("#footAddr").hidden = !addr;
+  const avail = cars.filter(c=>c.status==="available");
+  $("#stCount").textContent = avail.length;
+  $("#stFrom").textContent = avail.length ? usd(Math.min(...avail.map(c=>c.price))) : "—";
+  $("#stMakes").textContent = new Set(cars.map(c=>c.make)).size;
+}
+
+/* ---------- Render ---------- */
+function filtered(){
+  const q = state.q.trim().toLowerCase();
+  let list = cars.filter(c=>{
+    if(q && ![c.make,c.model,c.trim,String(c.year),c.id].join(" ").toLowerCase().includes(q)) return false;
+    if(state.make && c.make!==state.make) return false;
+    if(state.bodies.size && !state.bodies.has(c.body)) return false;
+    if(state.priceMax!=null && c.price>state.priceMax) return false;
+    if(state.yearMin && c.year<+state.yearMin) return false;
+    if(state.milesMax && c.miles>+state.milesMax) return false;
+    if(state.onlyFav && !favs.has(c.id)) return false;
+    return true;
+  });
+  const by = {
+    "featured":(a,b)=>(b.featured-a.featured)||((a.status==="reserved")-(b.status==="reserved"))||(a.order-b.order),
+    "price-asc":(a,b)=>a.price-b.price, "price-desc":(a,b)=>b.price-a.price,
+    "year":(a,b)=>b.year-a.year||a.miles-b.miles, "miles":(a,b)=>a.miles-b.miles
+  }[state.sort];
+  return list.sort(by);
+}
+const heart = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.3C1.4 7.8 3.6 4.5 7 4.5c2 0 3.4 1.1 5 2.9 1.6-1.8 3-2.9 5-2.9 3.4 0 5.6 3.3 4.3 6.7-1.8 4.7-9.3 9.3-9.3 9.3Z"/></svg>`;
+function cardHTML(c){
+  const media = c.photos[0] ? imgHTML(c.photos[0], carName(c), c) : tileHTML(c);
+  const badges = [
+    c.status==="reserved" && `<span class="badge res">${esc(t("bReserved"))}</span>`,
+    c.old>c.price && `<span class="badge deal">${esc(t("bDeal"))}</span>`,
+    c.featured && c.status!=="reserved" && `<span class="badge new">${esc(t("bNew"))}</span>`
+  ].filter(Boolean).join("");
+  const m = monthly(c.price, c.price*.1, 60, CONFIG.apr);
+  const isFav = favs.has(c.id);
+  const specs = [c.miles?fmtMiles(c.miles):"", T[lang].transL[c.transmission]||c.transmission, c.drivetrain, T[lang].fuelL[c.fuel]||""].filter(Boolean);
+  return `<article class="card">
+    <button type="button" class="fav" data-fav="${esc(c.id)}" aria-pressed="${isFav}" aria-label="${esc(isFav?t("unfav"):t("fav"))}">${heart}</button>
+    <a class="hit" href="#car-${esc(c.id)}" data-open="${esc(c.id)}">
+      <div class="media">${media}<div class="badges">${badges}</div></div>
+      <div class="cbody">
+        <h3>${esc(carName(c))}<small>${esc(c.trim)}</small></h3>
+        <div class="specs num">${specs.map(s=>`<span>${esc(s)}</span>`).join("")}</div>
+        <div class="pricerow">
+          <div style="display:grid;gap:2px">${c.old>c.price?`<span class="was">${usd(c.old)}</span>`:""}<span class="sticker">${c.price?usd(c.price):"—"}</span></div>
+          ${c.price?`<div class="monthly">${esc(t("est"))}<b>${usd(m)}${esc(t("perMonth"))}</b></div>`:""}
+        </div>
+      </div>
+    </a>
+    <div class="cfoot"><a class="btn btn-wa" href="${esc(waForCar(c))}" target="_blank" rel="noopener">${esc(t("askWa"))}</a></div>
+  </article>`;
+}
+function render(){
+  const list = filtered();
+  $("#count").textContent = t(list.length===1?"count1":"countN",{n:list.length});
+  $("#favCount").textContent = favs.size;
+  $("#fFav").setAttribute("aria-pressed", state.onlyFav);
+  $("#fPriceVal").textContent = state.priceMax>=priceCeil ? t("anyPrice") : usd(state.priceMax);
+  $("#grid").innerHTML = list.length ? list.map(cardHTML).join("")
+    : `<div class="empty"><b>${esc(t("emptyT"))}</b>${esc(t("emptyP"))}</div>`;
+}
+
+/* ---------- Detail ---------- */
+let open = null;
+function openCar(id, push=true){
+  const c = cars.find(x=>x.id===id); if(!c) return;
+  open = {c, img:0, down:Math.round(c.price*.1/500)*500, term:60, apr:CONFIG.apr, last:document.activeElement};
+  if(push){ try{ history.replaceState(null,"","#car-"+id); }catch(e){} }
+  drawSheet(); document.body.style.overflow="hidden";
+}
+function closeCar(){
+  if(!open) return;
+  const last = open.last; open = null;
+  $("#sheetRoot").innerHTML = ""; document.body.style.overflow="";
+  try{ history.replaceState(null,"",location.pathname+location.search); }catch(e){}
+  if(last && last.focus) last.focus();
+}
+function drawSheet(){
+  const {c} = open;
+  const isFav = favs.has(c.id);
+  const main = c.photos[open.img] ? imgHTML(c.photos[open.img], carName(c), c) : tileHTML(c);
+  const thumbs = c.photos.length>1 ? `<div class="thumbs">${c.photos.map((p,i)=>`<button type="button" data-img="${i}" aria-current="${i===open.img}" aria-label="${i+1}/${c.photos.length}"><img src="${esc(p)}" alt="" loading="lazy"></button>`).join("")}</div>` : "";
+  const odo = String(Math.round(c.miles||0)).padStart(6,"0").split("").map(d=>`<span>${d}</span>`).join("");
+  const rows = [
+    [t("stock"), c.id],[t("year"), c.year],[t("trans"), T[lang].transL[c.transmission]||c.transmission],[t("drive"), c.drivetrain],
+    [t("engine"), c.engine],[t("fuel"), T[lang].fuelL[c.fuel]||c.fuel],[t("ext"), c.ext],[t("int"), c.int]
+  ].filter(r=>r[1]);
+  const desc = (lang==="en" ? c.desc_en||c.desc_es : c.desc_es||c.desc_en);
+  const m = monthly(c.price, open.down, open.term, open.apr);
+  $("#sheetRoot").innerHTML = `<div class="sheet-bg" data-close>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="dTitle">
+      <div class="sheet-top">
+        <button type="button" class="iconbtn" data-close aria-label="${esc(t("close"))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+        <span class="t">${esc(carName(c))}</span>
+        <button type="button" class="fav" style="position:static;box-shadow:none;border:1px solid var(--line)" data-fav="${esc(c.id)}" aria-pressed="${isFav}" aria-label="${esc(isFav?t("unfav"):t("fav"))}">${heart}</button>
+        <button type="button" class="btn btn-ghost" id="dShare">${esc(t("share"))}</button>
+      </div>
+      <div class="sheet-in">
+        <div class="gal"><div class="main">${main}</div>${thumbs}</div>
+        <div class="d-head">
+          <div><h2 id="dTitle">${esc(carName(c))}</h2><p>${esc(c.trim)}${c.status==="reserved"?` · <strong style="color:var(--warn)">${esc(t("bReserved"))}</strong>`:""}</p></div>
+          <div class="d-price">${c.old>c.price?`<span class="was">${usd(c.old)}</span>`:""}<span class="sticker">${c.price?usd(c.price):"—"}</span></div>
+        </div>
+        <div class="d-cta"><a class="btn btn-wa" href="${esc(waForCar(c))}" target="_blank" rel="noopener">${esc(t("askWa"))}</a></div>
+        <div class="d-cols">
+          <div style="display:grid;gap:24px;min-width:0">
+            <div class="label-card">
+              <header><span>${esc(t("label"))}</span><span>J·MOTORS</span></header>
+              <dl>
+                <div style="grid-column:1/-1;border-right:0"><dt>${esc(t("mileage"))}</dt><dd><div class="odo" aria-label="${esc(fmtMiles(c.miles||0))}">${odo}</div></dd></div>
+                ${rows.map(([k,v])=>`<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}
+              </dl>
+              ${c.vin?`<div class="vin"><span><span style="color:var(--muted)">VIN</span> <span id="vinTxt">${esc(c.vin)}</span></span><button type="button" class="linkbtn" id="dVin">${esc(t("copyVin"))}</button></div>`:""}
+            </div>
+            ${desc?`<div class="desc"><h3>${esc(t("descT"))}</h3><p>${esc(desc)}</p></div>`:""}
+          </div>
+          ${c.price?`<div class="calc">
+            <h3 style="margin:0">${esc(t("calcT"))}</h3>
+            <div class="out"><b id="cOut">${usd(m)}</b><span>${esc(t("monthlyEst"))}</span></div>
+            <div class="field"><label for="cDown">${esc(t("down"))} · <span class="range-val" id="cDownVal">${usd(open.down)}</span></label>
+              <input type="range" id="cDown" min="0" max="${Math.round(c.price*.6/500)*500}" step="500" value="${open.down}"></div>
+            <div class="field"><span class="lab">${esc(t("term"))}</span>
+              <div class="seg" id="cTerm">${CONFIG.terms.map(n=>`<button type="button" data-term="${n}" aria-pressed="${n===open.term}">${n}</button>`).join("")}</div></div>
+            <div class="field"><label for="cApr">${esc(t("apr"))} (%)</label>
+              <input class="input num" id="cApr" type="number" inputmode="decimal" min="0" max="30" step="0.1" value="${open.apr}"></div>
+            <p class="fine">${esc(t("calcFine"))}</p>
+          </div>`:""}
+        </div>
+      </div>
+    </div></div>`;
+  const sheet = $("#sheetRoot .sheet"); sheet.focus?.();
+  $("#sheetRoot .iconbtn").focus();
+}
+function updateCalc(){
+  const {c} = open;
+  $("#cOut").textContent = usd(monthly(c.price, open.down, open.term, open.apr));
+  $("#cDownVal").textContent = usd(open.down);
+}
+
+/* ---------- Events ---------- */
+function toast(msg){ const el=$("#toast"); el.textContent=msg; el.hidden=false; clearTimeout(toast.t); toast.t=setTimeout(()=>el.hidden=true,2200); }
+async function copy(text, ok){
+  try{ await navigator.clipboard.writeText(text); toast(ok); }catch(e){ toast(t("copyFail")); }
+}
+function toggleFav(id){
+  favs.has(id) ? favs.delete(id) : favs.add(id);
+  store.set("favs",[...favs]); render();
+  if(open) drawSheet();
+}
+document.addEventListener("click", e=>{
+  const el = e.target.closest("[data-fav],[data-open],[data-close],[data-body],[data-lang],[data-img],[data-term],#dShare,#dVin,#fFav,#fClear,#filtersToggle");
+  if(!el) return;
+  if(el.dataset.fav){ e.preventDefault(); toggleFav(el.dataset.fav); return; }
+  if(el.dataset.open){ e.preventDefault(); openCar(el.dataset.open); return; }
+  if(el.hasAttribute("data-close")){ if(e.target===el || el.classList.contains("iconbtn")) closeCar(); return; }
+  if(el.dataset.body){ const b=el.dataset.body; state.bodies.has(b)?state.bodies.delete(b):state.bodies.add(b); el.setAttribute("aria-pressed",state.bodies.has(b)); render(); return; }
+  if(el.dataset.lang){ lang=el.dataset.lang; store.set("lang",lang); buildControls(); applyLang(); render(); if(open) drawSheet(); return; }
+  if(el.dataset.img){ open.img=+el.dataset.img; drawSheet(); return; }
+  if(el.dataset.term){ open.term=+el.dataset.term; document.querySelectorAll("#cTerm button").forEach(b=>b.setAttribute("aria-pressed",b===el)); updateCalc(); return; }
+  if(el.id==="dShare"){ const base=(CONFIG.siteUrl||location.href).replace(/#.*$/,""); copy(base+"#car-"+open.c.id, t("copied")); return; }
+  if(el.id==="dVin"){ copy(open.c.vin, t("vinCopied")); return; }
+  if(el.id==="fFav"){ state.onlyFav=!state.onlyFav; render(); return; }
+  if(el.id==="fClear"){ Object.assign(state,{q:"",make:"",yearMin:"",milesMax:"",onlyFav:false,priceMax:priceCeil}); state.bodies.clear(); $("#fText").value=$("#qText").value=""; buildControls(); render(); return; }
+  if(el.id==="filtersToggle"){ const f=$("#filters"); f.classList.toggle("open"); el.setAttribute("aria-expanded",f.classList.contains("open")); return; }
+});
+document.addEventListener("input", e=>{
+  const id = e.target.id;
+  if(id==="fText"){ state.q=e.target.value; $("#qText").value=state.q; render(); }
+  else if(id==="fPrice"){ state.priceMax=+e.target.value; render(); }
+  else if(id==="cDown"){ open.down=+e.target.value; updateCalc(); }
+  else if(id==="cApr"){ const v=parseFloat(e.target.value); open.apr=isFinite(v)&&v>=0?Math.min(v,30):0; updateCalc(); }
+});
+document.addEventListener("change", e=>{
+  const id = e.target.id, v = e.target.value;
+  if(id==="fMake"){ state.make=v; $("#qMake").value=v; render(); }
+  else if(id==="fYear"){ state.yearMin=v; render(); }
+  else if(id==="fMiles"){ state.milesMax=v; render(); }
+  else if(id==="sort"){ state.sort=v; render(); }
+});
+$("#quickForm").addEventListener("submit", e=>{
+  e.preventDefault();
+  state.q = $("#qText").value; state.make = $("#qMake").value;
+  const p = $("#qPrice").value; state.priceMax = p ? +p : priceCeil;
+  $("#fText").value = state.q; $("#fMake").value = state.make; $("#fPrice").value = state.priceMax;
+  render(); $("#inventario").scrollIntoView({behavior:"smooth"});
+});
+document.addEventListener("keydown", e=>{ if(e.key==="Escape" && open) closeCar(); });
+function routeFromHash(){
+  const m = /^#car-([\w-]+)$/.exec(location.hash||"");
+  if(m) openCar(m[1], false); else if(open) closeCar();
+}
+window.addEventListener("hashchange", routeFromHash);
+
+load();
+</script>
+</body>
+</html>
